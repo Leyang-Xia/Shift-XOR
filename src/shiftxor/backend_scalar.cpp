@@ -17,7 +17,8 @@ Status xor_shifted_scalar(ConstBufferView source, std::size_t source_offset,
                           BufferView destination, std::size_t destination_offset,
                           std::size_t bytes) {
     if (source.data == nullptr || destination.data == nullptr ||
-        source_offset + bytes > source.size || destination_offset + bytes > destination.size) {
+        source_offset > source.size || bytes > source.size - source_offset ||
+        destination_offset > destination.size || bytes > destination.size - destination_offset) {
         return Status::error(StatusCode::kBufferTooSmall,
                              "buffer range is outside the provided view");
     }

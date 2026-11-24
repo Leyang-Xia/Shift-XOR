@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cstdint>
+#include <limits>
 #include <vector>
 
 #include "shiftxor/backend.h"
@@ -48,5 +49,19 @@ int main() {
             {data_storage[0].data(), data_storage[0].size()}, 0,
             {avx2_storage[0].data(), avx2_storage[0].size()}, 0, 32));
     }
+
+    std::uint8_t source_byte = 1;
+    std::uint8_t destination_byte = 2;
+    const auto oversized_offset = std::numeric_limits<std::size_t>::max();
+    const auto scalar_status = shiftxor::xor_shifted_scalar(
+        {&source_byte, 1}, oversized_offset, {&destination_byte, 1}, 0, 1);
+    assert(scalar_status.code() == shiftxor::StatusCode::kBufferTooSmall);
+    assert(destination_byte == 2);
+
+    const auto avx2_status = shiftxor::xor_shifted_avx2(
+        {&source_byte, 1}, 0, {&destination_byte, 1}, oversized_offset, 1);
+    assert(avx2_status.code() == shiftxor::StatusCode::kBufferTooSmall);
+    assert(destination_byte == 2);
+
     return 0;
 }
